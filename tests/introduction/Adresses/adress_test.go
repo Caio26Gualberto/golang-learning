@@ -6,14 +6,25 @@ import (
 	"testing"
 )
 
+type TestScenario struct {
+	adressInserted string
+	expectedReturn string
+}
+
 func TestAdressType(t *testing.T) {
-	addresForTest := "Avenue Paulista"
+	tests := []TestScenario{
+		{"Street ABC", "Street"},
+		{"Avenue Paulista", "Avenue"},
+		{"Road 66", "Road"},
+		{"Highway 666", "Highway"},
+		{"Estrada", "Invalid type!"},
+	}
 
-	addresTypeExpected := "Avenue"
+	for _, scenario := range tests {
+		adressTypeReceived := AdressType(scenario.adressInserted)
 
-	addresTypeReceived := AdressType(addresForTest)
-
-	if addresTypeReceived != addresTypeExpected {
-		t.Errorf("O tipo recebido é diferente do esperado! Esperava %s e recebeu %s", addresTypeExpected, addresTypeReceived)
+		if adressTypeReceived != scenario.expectedReturn {
+			t.Errorf("O tipo recebido %s é diferente do esperado %s", adressTypeReceived, scenario.expectedReturn)
+		}
 	}
 }
