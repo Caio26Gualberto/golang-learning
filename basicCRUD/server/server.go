@@ -34,9 +34,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	db, erro := db.Connect()
 
 	if erro != nil {
+		fmt.Println(erro)
 		w.Write([]byte("Erro ao conectar ao banco de dados"))
 		return
 	}
+	defer db.Close()
 
 	// PREPARE STATEMENT
 	statement, erro := db.Prepare("INSERT INTO users (name, email) values (?, ?)")
@@ -62,4 +64,45 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(fmt.Sprintf("Usuário inserido com sucesso! id: %d", insertedId)))
+}
+
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+	db, err := db.Connect()
+
+	if err != nil {
+		w.Write([]byte("Erro ao conectar com o banco de dados!"))
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM users")
+
+	if err != nil {
+		w.Write([]byte("Erro ao bsucar os usuários!"))
+		return
+	}
+	defer rows.Close()
+
+	var users []user
+	for rows.Next() {
+		var user user
+
+		if err := rows.Scan(&user.Id, &user.Name, &user.Email); err != nil {
+			w.Write([]byte("Erro ao escanear o usuário"))
+			return
+		}
+
+		users = append(users, user)
+		_ = users
+	}
+
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(users); err != nil {
+		w.Write([]byte("Erro ao converter usuários para JSON"))
+		return
+	}
+}
+
+func SearchUser(w http.ResponseWriter, r *http.Request) {
+
 }
